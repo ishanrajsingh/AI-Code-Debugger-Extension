@@ -75,8 +75,6 @@ This validates the feasibility and core value of the solution.
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/ai-code-debugger.git
-  Open Chrome and go to:
-
 2. Open Chrome and go to: chrome://extensions
 3. Enable Developer Mode
 4. Click Load Unpacked and select the project folder
