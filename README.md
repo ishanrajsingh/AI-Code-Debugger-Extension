@@ -1,3 +1,7 @@
 # AI-Code-Debugger-Extension
 AI Code Debugger is a lightweight Chrome extension designed to simplify and accelerate the debugging process in the era of AI-assisted coding. With the growing use of AI tools for code generation, developers often face challenges in validating code correctness, identifying hidden errors, and understanding whether the code is AI-generated or human-written. Our solution enables users to instantly analyze any code by simply copying it and clicking the “Analyze Clipboard” button. The extension securely sends the code to the Gemini API, which performs deep analysis to detect runtime errors, warnings, potential exceptions, and code quality issues. It also provides intelligent fix suggestions along with a probability score indicating whether the code is AI-generated. By eliminating IDE dependency and supporting all programming languages, AI Code Debugger offers a fast, transparent, and universal debugging experience that enhances developer productivity and trust in AI-generated code.
 
+<img width="1920" height="977" alt="ss_2" src="https://github.com/user-attachments/assets/d798e31e-0e7b-4003-9f33-eef29e5463d2" />
+
+MVP:
+https://drive.google.com/drive/folders/1m6aDZ5KxO31Q9WtvxmxdqwAV4q9YH9S7?usp=sharing
