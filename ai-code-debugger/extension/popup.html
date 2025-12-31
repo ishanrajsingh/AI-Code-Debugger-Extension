@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AI Code Debugger</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header with gradient -->
+    <div class="header">
+      <div class="header-gradient"></div>
+      <div class="header-content">
+        <div class="logo">
+          <span class="logo-icon">🔍</span>
+          <div class="logo-text">
+            <div class="logo-title">AI Code Debugger</div>
+            <div class="logo-subtitle">Powered by Gemini 2.5 Flash Lite</div>
+          </div>
+        </div>
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          <span id="connectionStatus">Connected</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stats Cards (4 cards now) -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-details">
+          <div class="stat-value" id="totalAnalyzed">0</div>
+          <div class="stat-label">Analyzed</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🐛</div>
+        <div class="stat-details">
+          <div class="stat-value" id="issuesFound">0</div>
+          <div class="stat-label">Issues</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-details">
+          <div class="stat-value" id="aiChance">0%</div>
+          <div class="stat-label">AI Chance</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-details">
+          <div class="stat-value" id="timesSaved">0</div>
+          <div class="stat-label">Min Saved</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Last Analysis Section -->
+    <div class="section">
+      <div class="section-header">
+        <h3>Recent Activity</h3>
+        <span class="badge" id="activityBadge">Just now</span>
+      </div>
+      
+      <!-- AI Probability Badge -->
+      <div id="aiProbabilityContainer" style="display: none; margin-bottom: 12px;">
+        <div class="ai-probability-card">
+          <div class="ai-prob-header">
+            <span class="ai-icon">🤖</span>
+            <span class="ai-label">AI-Generated Probability</span>
+          </div>
+          <div class="ai-prob-meter">
+            <div class="ai-prob-fill" id="aiProbFill"></div>
+          </div>
+          <div class="ai-prob-value">
+            <span id="aiProbPercent">0%</span>
+            <span id="aiProbLabel" class="ai-prob-label-text">Unknown</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="last-analysis" id="lastAnalysis">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <p>No analysis yet</p>
+          <small>Paste code to get started</small>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="actions">
+      <button id="analyzeBtn" class="btn btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 11l3 3L22 4"></path>
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+        </svg>
+        <span>Analyze Clipboard</span>
+      </button>
+      <!-- Dashboard button
+      <button id="dashboardBtn" class="btn btn-secondary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Dashboard</span>
+      </button>
+    -->
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <span>EurekaHacks 2025</span>
+      <a href="http://localhost:8000/docs" target="_blank">API Docs →</a>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Debugger - Debug Before You Run</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <nav class="navbar">
+            <div class="logo">
+                <span class="logo-icon">🔍</span>
+                <span class="logo-text">AI Code Debugger</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#demo">Demo</a>
+                <a href="#stats">Stats</a>
+                <a href="http://localhost:8000/docs" target="_blank" class="btn-outline">API Docs</a>
+            </div>
+        </nav>
+
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-icon">✨</span>
+                Powered by Gemini 2.5 Flash Lite
+            </div>
+            <h1 class="hero-title">
+                Debug AI-Generated Code
+                <span class="gradient-text">Before You Run It</span>
+            </h1>
+            <p class="hero-subtitle">
+                66% of developers waste time fixing "almost right" AI code. 
+                We catch bugs proactively, not reactively.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="scrollToDemo()">
+                    <span>Try Live Demo</span>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7 10L12 5L11.3 4.3L5 10.6L11.3 16.9L12 16.2L7 11.2H20V10H7Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button class="btn-secondary" onclick="window.open('http://localhost:8000/docs')">
+                    View API
+                </button>
+            </div>
+            
+            <!-- Live Stats -->
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalAnalyzed">0</div>
+                    <div class="stat-label">Codes Analyzed</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-number" id="bugsFound">0</div>
+                    <div class="stat-label">Bugs Found</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-number" id="timeSaved">0min</div>
+                    <div class="stat-label">Time Saved</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Illustration -->
+        <div class="hero-visual">
+            <div class="code-window">
+                <div class="window-header">
+                    <div class="window-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">main.py</span>
+                </div>
+                <div class="code-content">
+                    <pre><code class="language-python"><span class="keyword">def</span> <span class="function">factorial</span>(<span class="param">n</span>):
+    <span class="keyword">return</span> n * factorial(n-<span class="number">1</span>)
+    
+<span class="comment"># ⚠️ AI Detected: Missing base case!</span></code></pre>
+                </div>
+                <div class="code-analysis">
+                    <div class="analysis-badge error">
+                        <span class="badge-dot"></span>
+                        3 Issues Found
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2 class="section-title">Why Developers Love It</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Real-Time Detection</h3>
+                <p>Automatically detects when you paste AI-generated code</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-Powered Analysis</h3>
+                <p>Llama 70B finds bugs, security issues, and performance problems</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3>Auto-Fix Suggestions</h3>
+                <p>Get working fixes, not just error messages</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Pattern Learning</h3>
+                <p>Gets smarter by learning from your debugging patterns</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Sandboxed Execution</h3>
+                <p>Safely runs code in isolated containers</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Multi-Language</h3>
+                <p>Supports Python, JavaScript, Java, C++, and more</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Demo Section -->
+    <section id="demo" class="demo-section">
+        <h2 class="section-title">Try It Live</h2>
+        <div class="demo-container">
+            <div class="demo-input">
+                <div class="input-header">
+                    <span>Paste Your Code</span>
+                    <select id="languageSelect" class="language-select">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                    </select>
+                </div>
+                <textarea id="codeInput" class="code-textarea" placeholder="# Paste buggy code here...
+def factorial(n):
+    return n * factorial(n-1)"></textarea>
+                <button class="btn-analyze" onclick="analyzeCode()">
+                    <span class="btn-text">Analyze Code</span>
+                    <span class="btn-loader" style="display: none;">
+                        <div class="spinner"></div>
+                    </span>
+                </button>
+            </div>
+            <div class="demo-output">
+                <div class="output-header">
+                    <span>Analysis Results</span>
+                    <div class="output-status" id="outputStatus"></div>
+                </div>
+                <div id="resultsContainer" class="results-container">
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <p>Paste code and click "Analyze" to see results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="stats-section">
+        <h2 class="section-title">Impact Metrics</h2>
+        <div class="impact-grid">
+            <div class="impact-card">
+                <div class="impact-number">66%</div>
+                <div class="impact-label">Developers waste time on AI code</div>
+                <div class="impact-source">Stack Overflow Survey 2025</div>
+            </div>
+            <div class="impact-card">
+                <div class="impact-number">5min</div>
+                <div class="impact-label">Average time saved per bug</div>
+                <div class="impact-source">Our Analysis</div>
+            </div>
+            <div class="impact-card">
+                <div class="impact-number">300+</div>
+                <div class="impact-label">Tokens per second (Groq)</div>
+                <div class="impact-source">Faster than GPT-4</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo-icon">🔍</span>
+                <span>AI Code Debugger</span>
+            </div>
+            <div class="footer-links">
+                <a href="http://localhost:8000/docs">API Docs</a>
+                <a href="https://github.com">GitHub</a>
+                <a href="#demo">Try Demo</a>
+            </div>
+            <div class="footer-tech">
+                Built with Llama 3.3 70B • FastAPI • Chrome Extension
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>EurekaHacks 2025 Submission • Made with ❤️ for developers</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
