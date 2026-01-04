@@ -3,7 +3,13 @@ AI Code Debugger is a lightweight Chrome extension designed to simplify and acce
 
 <img width="1920" height="977" alt="ss_2" src="https://github.com/user-attachments/assets/d798e31e-0e7b-4003-9f33-eef29e5463d2" />
 
-MVP:
+Demo:
+
+
+https://github.com/user-attachments/assets/c67ebc91-d457-4d59-a5c5-68976ac08a9d
+
+
+MVP Link:
 https://drive.google.com/drive/folders/1m6aDZ5KxO31Q9WtvxmxdqwAV4q9YH9S7?usp=sharing
 
 ---
