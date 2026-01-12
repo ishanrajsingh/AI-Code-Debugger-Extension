@@ -98,3 +98,8 @@ This validates the feasibility and core value of the solution.
 6. Offline analysis for privacy-sensitive environments
 7. Chrome Web Store deployment
 
+## Note: 
+
+Activate venv ```venv\Scripts\Activate.ps1```
+Run uvicorn ```uvicorn main:app --reload --port 8000```
+
