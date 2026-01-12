@@ -83,18 +83,18 @@ Return ONLY valid JSON:
             ai_prob = result.get("ai_generated_probability", 0.0)
             
             if ai_prob == 0.0 or "ai_generated_probability" not in result:
-                print(f"⚠️  Llama didn't provide AI probability, using pattern detection...")
+                print(f"Llama didn't provide AI probability, using pattern detection...")
                 ai_prob = self._detect_ai_patterns(code)
                 result["ai_generated_probability"] = ai_prob
             
-            print(f"🌐 Detected: {result['detected_language']}")
-            print(f"🤖 AI Probability: {ai_prob:.2f} ({int(ai_prob * 100)}%)")
-            print(f"📊 {self._get_ai_reasoning(code, ai_prob)}")
+            print(f"Detected: {result['detected_language']}")
+            print(f"AI Probability: {ai_prob:.2f} ({int(ai_prob * 100)}%)")
+            print(f"{self._get_ai_reasoning(code, ai_prob)}")
 
             return result
 
         except json.JSONDecodeError as e:
-            print(f"⚠️  JSON decode error: {e}")
+            print(f"JSON decode error: {e}")
             ai_prob = self._detect_ai_patterns(code)
             return {
                 "detected_language": self._fallback_detect(code),
@@ -104,7 +104,7 @@ Return ONLY valid JSON:
             }
 
         except Exception as e:
-            print(f"❌ Analysis error: {e}")
+            print(f"Analysis error: {e}")
             return {
                 "detected_language": self._fallback_detect(code),
                 "issues": [],
@@ -240,10 +240,10 @@ Return ONLY valid JSON:
 
         # Log findings
         if found_patterns:
-            print(f"   🔍 Pattern detection: {', '.join(found_patterns)}")
-            print(f"   📊 Total score: {total_score} points → {probability:.2f} ({int(probability * 100)}%)")
+            print(f"Pattern detection: {', '.join(found_patterns)}")
+            print(f"Total score: {total_score} points → {probability:.2f} ({int(probability * 100)}%)")
         else:
-            print(f"   ✅ No AI patterns detected → default low (0.1)")
+            print(f"No AI patterns detected → default low (0.1)")
 
         return probability
 
