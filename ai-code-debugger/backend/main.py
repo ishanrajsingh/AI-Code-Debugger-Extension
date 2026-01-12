@@ -5,9 +5,9 @@ from typing import List, Optional, Dict, Any
 import asyncio
 from datetime import datetime
 
-# Import your modules
 from sandbox import CodeSandbox
-from llama_analyzer import LlamaAnalyzer
+from gemini_analyzer import GeminiAnalyzer
+
 from pattern_learner import PatternLearner
 
 app = FastAPI(title="AI Code Debugger API")
@@ -23,7 +23,7 @@ app.add_middleware(
 
 # Initialize services
 sandbox = CodeSandbox()
-llama = LlamaAnalyzer()
+gemini = GeminiAnalyzer()
 pattern_learner = PatternLearner()
 
 # Models
@@ -78,14 +78,14 @@ async def root():
 async def health():
     """Health check endpoint"""
     try:
-        test_result = await llama.analyze_code("print('test')", "auto")
-        llama_status = True if test_result else False
+        test_result = await gemini.analyze_code("print('test')", "auto")
+        gemini_status = True if test_result else False
     except:
-        llama_status = False
+        gemini_status = False
     
     return {
         "status": "healthy",
-        "llama": llama_status,
+        "gemini": gemini_status,
         "sandbox": True,
         "timestamp": datetime.now().isoformat()
     }
@@ -105,44 +105,53 @@ async def analyze_code(request: CodeAnalysisRequest):
     """Main endpoint for code analysis"""
     try:
         print(f"\n{'='*60}")
-        print(f"🔍 ANALYZING CODE")
+        print(f"ANALYZING CODE")
         print(f"{'='*60}")
         print(f"Code length: {len(request.code)} characters")
         print(f"Code preview: {request.code[:100]}...")
         
-        # Let Llama analyze and detect the language
-        print(f"\n⏳ Running Llama analysis with auto-detection...")
-        llama_analysis = await llama.analyze_code(request.code, "auto")
+        # Let gemini analyze and detect the language
+        print(f"\nRunning gemini analysis with auto-detection...")
+        gemini_analysis = await gemini.analyze_code(request.code, "auto")
         
-        # Get the language Llama detected
-        detected_language = llama_analysis.get("detected_language", "unknown").lower()
+        # Get the language gemini detected
+        detected_language = gemini_analysis.get("detected_language", "unknown").lower()
         
-        print(f"✅ Llama detected language: {detected_language}")
+        print(f"gemini detected language: {detected_language}")
         
         # Only reject if analysis completely failed
         if detected_language in ["error", "failed", "none"]:
-            print(f"❌ Language detection failed critically")
+            print(f"Language detection failed critically")
             raise HTTPException(
                 status_code=400,
                 detail="Unable to analyze code. The code may be corrupted or incomplete."
             )
         
         # Extract AI probability
-        ai_probability = llama_analysis.get("ai_generated_probability", 0.0)
-        print(f"🤖 AI Generated Probability: {ai_probability} ({int(ai_probability * 100)}%)")
+        # Boost AI probability when patterns detected
+        ai_probability = gemini_analysis.get("ai_generated_probability", 0.0)
+
+        # Get AI patterns from gemini analysis
+        gemini_patterns = gemini_analysis.get("patterns", [])
+        if gemini_patterns:
+            ai_probability = max(ai_probability, 0.90)  # Boost to 90% if AI patterns found
+            print(f"AI PATTERNS FOUND → BOOSTED to {ai_probability}")
+
+        print(f"AI Generated Probability: {ai_probability} ({int(ai_probability * 100)}%)")
+
         
         # Determine if language is executable
         is_executable = detected_language not in NON_EXECUTABLE_LANGUAGES
         
         if is_executable:
-            print(f"\n⏳ Running sandbox execution for {detected_language}...")
+            print(f"\nRunning sandbox execution for {detected_language}...")
             # Run sandbox and pattern matching in parallel
             sandbox_result, learned_patterns = await asyncio.gather(
                 sandbox.execute_code(request.code, detected_language),
                 pattern_learner.get_similar_issues(request.code)
             )
         else:
-            print(f"\n⏭️  Skipping sandbox execution (non-executable language: {detected_language})")
+            print(f"\nSkipping sandbox execution (non-executable language: {detected_language})")
             sandbox_result = {"output": None, "error": None}
             learned_patterns = await pattern_learner.get_similar_issues(request.code)
         
@@ -151,12 +160,49 @@ async def analyze_code(request: CodeAnalysisRequest):
         
         # Add sandbox errors (only if language is executable)
         if is_executable and sandbox_result.get("error"):
-            print(f"\n⚠️  Sandbox Error Found:")
-            print(f"   {sandbox_result['error'][:100]}...")
+            error_msg = sandbox_result["error"].lower()
             
-            # Skip "unsupported language" errors
-            if "unsupported" not in sandbox_result["error"].lower():
-                fix_suggestion = await llama.suggest_fix(
+            if "timeout" in error_msg:
+                print(f"\nTimeout detected (interactive/blocking code) - SKIPPED")
+                pass
+            elif "interactive" in error_msg or "input" in error_msg:
+                print(f"\nInteractive code detected - SKIPPED")
+                pass
+            elif "unsupported" in error_msg:
+                print(f"\nUnsupported language error - SKIPPED")
+                pass
+            elif "memory" in error_msg:
+                print(f"\nMemory limit exceeded - SKIPPED")
+                pass
+            elif "execution halted" in error_msg:
+                print(f"\nExecution halted error - SKIPPED")
+                pass
+            elif "infinite loop" in error_msg:
+                print(f"\nInfinite loop detected - SKIPPED")
+                pass
+            elif "segmentation fault" in error_msg:
+                print(f"\nSegmentation fault detected - SKIPPED")
+                pass
+            elif "stack overflow" in error_msg:
+                print(f"\nStack overflow detected - SKIPPED")
+                pass
+            elif "out of memory" in error_msg:
+                print(f"\nOut of memory detected - SKIPPED")
+                pass
+            elif "recursion limit" in error_msg:
+                print(f"\nRecursion limit reached - SKIPPED")
+                pass
+            elif "timeout" in error_msg:
+                print(f"\nExecution timeout - SKIPPED")
+                pass
+            elif ("import" or "module") in error_msg:
+                print(f"\nMissing module error - SKIPPED")
+                pass
+            else:
+                print(f"\nSandbox Error Found:")
+                print(f"   {sandbox_result['error'][:100]}...")
+                
+                fix_suggestion = await gemini.suggest_fix(
                     request.code, 
                     sandbox_result["error"]
                 )
@@ -168,12 +214,12 @@ async def analyze_code(request: CodeAnalysisRequest):
                     fix=fix_suggestion,
                     severity="error"
                 ))
+
+        # Add gemini-detected issues
+        gemini_issues = gemini_analysis.get("issues", [])
+        print(f"\ngemini found {len(gemini_issues)} issues")
         
-        # Add Llama-detected issues
-        llama_issues = llama_analysis.get("issues", [])
-        print(f"\n🔍 Llama found {len(llama_issues)} issues")
-        
-        for issue in llama_issues:
+        for issue in gemini_issues:
             # Filter out misleading issues for non-executable languages
             if not is_executable:
                 # Skip "not a programming language" type messages for HTML/CSS
@@ -182,7 +228,7 @@ async def analyze_code(request: CodeAnalysisRequest):
                     "cannot be compiled",
                     "cannot be executed"
                 ]):
-                    print(f"   ⏭️  Skipping misleading issue: {issue.get('type')}")
+                    print(f"Skipping misleading issue: {issue.get('type')}")
                     continue
             
             issues.append(Issue(**issue))
@@ -197,7 +243,7 @@ async def analyze_code(request: CodeAnalysisRequest):
                     severity="warning"
                 ))
         
-        print(f"\n📋 Total Issues: {len(issues)}")
+        print(f"\nTotal Issues: {len(issues)}")
         for i, issue in enumerate(issues, 1):
             print(f"   {i}. [{issue.severity.upper()}] {issue.type}")
         
@@ -215,8 +261,8 @@ async def analyze_code(request: CodeAnalysisRequest):
                 for issue in issues
             ]
             
-            print(f"\n🔧 Generating fixed code...")
-            fixed_code = await llama.generate_fixed_code(
+            print(f"\nGenerating fixed code...")
+            fixed_code = await gemini.generate_fixed_code(
                 request.code,
                 issues_dicts
             )
@@ -229,12 +275,12 @@ async def analyze_code(request: CodeAnalysisRequest):
         )
         
         # Calculate confidence
-        confidence = calculate_confidence(issues, llama_analysis)
+        confidence = calculate_confidence(issues, gemini_analysis)
         
         # Build result
         result = AnalysisResult(
             issues=issues,
-            suggestions=llama_analysis.get("suggestions", []),
+            suggestions=gemini_analysis.get("suggestions", []),
             fixedCode=fixed_code,
             confidence=confidence,
             executionResult=sandbox_result if is_executable else None,
@@ -244,7 +290,7 @@ async def analyze_code(request: CodeAnalysisRequest):
         )
         
         print(f"\n{'='*60}")
-        print(f"✅ ANALYSIS COMPLETE")
+        print(f"ANALYSIS COMPLETE")
         print(f"{'='*60}")
         print(f"Language: {result.detected_language} ({'executable' if is_executable else 'non-executable'})")
         print(f"Issues: {len(result.issues)}")
@@ -257,7 +303,7 @@ async def analyze_code(request: CodeAnalysisRequest):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"\n❌ ERROR in analyze endpoint:")
+        print(f"\nERROR in analyze endpoint:")
         print(f"   {str(e)}")
         import traceback
         traceback.print_exc()
