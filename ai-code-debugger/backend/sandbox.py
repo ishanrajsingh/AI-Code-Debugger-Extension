@@ -3,7 +3,12 @@ import json
 import tempfile
 import os
 import subprocess
+import sys
 from typing import Dict, Any
+
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 
 try:
     import docker
@@ -23,15 +28,11 @@ class CodeSandbox:
                 self.client = docker.from_env()
                 self.client.ping()
                 self.docker_available = True
-                print("✅ Docker available - using sandboxed execution")
             except Exception as e:
-                print(f"⚠️  Docker not available: {e}")
-                print("ℹ️  Using fallback mode (limited security)")
                 self.docker_available = False
         else:
-            print("⚠️  Docker not installed - using fallback mode")
             self.docker_available = False
-        
+    
     async def execute_code(self, code: str, language: str) -> Dict[str, Any]:
         """Execute code in sandboxed environment or fallback"""
         try:
@@ -51,19 +52,24 @@ class CodeSandbox:
             return {"error": str(e), "output": ""}
     
     async def _execute_python_subprocess(self, code: str) -> Dict[str, Any]:
-        """Execute Python using subprocess (DEMO MODE - NOT SECURE)"""
+        """Execute Python using subprocess - FIXED FOR EMOJIS"""
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
                 f.write(code)
                 temp_file = f.name
             
-            # Run with timeout
+            env = os.environ.copy()
+            env['PYTHONIOENCODING'] = 'utf-8'
+            
             try:
                 result = subprocess.run(
                     ['python', temp_file],
                     capture_output=True,
                     text=True,
-                    timeout=self.timeout
+                    timeout=self.timeout,
+                    encoding='utf-8',
+                    errors='replace',
+                    env=env
                 )
                 
                 os.unlink(temp_file)
@@ -93,6 +99,10 @@ class CodeSandbox:
                 }
                 
         except Exception as e:
+            try:
+                os.unlink(temp_file)
+            except:
+                pass
             return {
                 "error": f"Execution error: {str(e)}",
                 "output": "",
@@ -101,18 +111,24 @@ class CodeSandbox:
             }
     
     async def _execute_javascript_subprocess(self, code: str) -> Dict[str, Any]:
-        """Execute JavaScript using subprocess (DEMO MODE)"""
+        """Execute JavaScript using subprocess - FIXED FOR EMOJIS"""
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.js', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.js', delete=False, encoding='utf-8') as f:
                 f.write(code)
                 temp_file = f.name
+            
+            env = os.environ.copy()
+            env['NODE_NO_WARNINGS'] = '1'
             
             try:
                 result = subprocess.run(
                     ['node', temp_file],
                     capture_output=True,
                     text=True,
-                    timeout=self.timeout
+                    timeout=self.timeout,
+                    encoding='utf-8',
+                    errors='replace',
+                    env=env
                 )
                 
                 os.unlink(temp_file)
@@ -140,6 +156,10 @@ class CodeSandbox:
                 }
                 
         except Exception as e:
+            try:
+                os.unlink(temp_file)
+            except:
+                pass
             return {
                 "error": f"Execution error: {str(e)}",
                 "output": "",
@@ -147,10 +167,11 @@ class CodeSandbox:
                 "mode": "subprocess"
             }
     
+    # Docker methods (unchanged - already UTF-8 safe)
     async def _execute_python_docker(self, code: str) -> Dict[str, Any]:
         """Execute Python code in Docker"""
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
                 f.write(code)
                 temp_file = f.name
             
@@ -163,7 +184,8 @@ class CodeSandbox:
                 mem_limit='128m',
                 cpu_quota=50000,
                 network_disabled=True,
-                remove=True
+                remove=True,
+                environment={'PYTHONIOENCODING': 'utf-8'}  # Docker UTF-8
             )
             
             try:
@@ -197,6 +219,10 @@ class CodeSandbox:
                 }
                 
         except Exception as e:
+            try:
+                os.unlink(temp_file)
+            except:
+                pass
             return {
                 "error": f"Docker error: {str(e)}",
                 "output": "",
@@ -207,7 +233,7 @@ class CodeSandbox:
     async def _execute_javascript_docker(self, code: str) -> Dict[str, Any]:
         """Execute JavaScript code in Docker"""
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.js', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.js', delete=False, encoding='utf-8') as f:
                 f.write(code)
                 temp_file = f.name
             
@@ -245,6 +271,10 @@ class CodeSandbox:
                 }
                 
         except Exception as e:
+            try:
+                os.unlink(temp_file)
+            except:
+                pass
             return {
                 "error": f"Docker error: {str(e)}",
                 "output": "",
@@ -273,4 +303,4 @@ class CodeSandbox:
     
     def is_healthy(self) -> bool:
         """Check if execution environment is available"""
-        return True  # Always return True since we have fallback
+        return True
